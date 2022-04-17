@@ -22,8 +22,16 @@ public class TransformationApp {
 //        test_filter(env);
 //        test_keyBy(env);
 //        test_reduce(env);
-        test_sink(env);
+//        test_sink(env);
+        test_richMap(env);
         env.execute("TransformationApp");
+    }
+
+    public static void test_richMap(StreamExecutionEnvironment env){
+        env.setParallelism(2); // 并行度设置为2，open就只会调用两次
+        DataStreamSource<String> source = env.readTextFile("data/access.log");
+        SingleOutputStreamOperator<AccessLog> map = source.map(new PkMapFunction());
+        map.print();
     }
 
     public static void test_sink(StreamExecutionEnvironment env){

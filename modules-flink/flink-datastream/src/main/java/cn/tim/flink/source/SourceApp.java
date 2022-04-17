@@ -1,5 +1,6 @@
 package cn.tim.flink.source;
 
+import cm.tim.flink.transformation.AccessLog;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.configuration.Configuration;
@@ -19,11 +20,18 @@ public class SourceApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         // test_01(env);
 //        test_02(env);
-        test_03(env);
+        //test_03(env);
+        test_source_01(env);
 
         env.execute("SourceApp");
     }
-
+    private static void test_source_01(StreamExecutionEnvironment env) {
+//        DataStreamSource<AccessLog> source = env.addSource(new AccessLogSource());
+//        DataStreamSource<AccessLog> source = env.addSource(new AccessLogSource()).setParallelism(2); error
+        DataStreamSource<AccessLog> source = env.addSource(new AccessLogSourceV2()).setParallelism(2);
+        System.out.println(source.getParallelism());
+        source.print();
+    }
     private static void test_03(StreamExecutionEnvironment env) {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "localhost:9092");
