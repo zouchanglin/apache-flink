@@ -1,8 +1,7 @@
 package cn.tim.flink.source;
 
-import cm.tim.flink.transformation.AccessLog;
+import cn.tim.flink.transformation.AccessLog;
 import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 import java.util.Random;
 

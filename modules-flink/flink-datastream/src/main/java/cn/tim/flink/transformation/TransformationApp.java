@@ -1,16 +1,16 @@
-package cm.tim.flink.transformation;
+package cn.tim.flink.transformation;
 
+import cn.tim.flink.source.Student;
+import cn.tim.flink.source.StudentSource;
 import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
-import org.apache.flink.api.common.typeinfo.TypeHint;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.streaming.api.datastream.ConnectedStreams;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.co.CoFlatMapFunction;
+import org.apache.flink.streaming.api.functions.co.CoMapFunction;
 import org.apache.flink.util.Collector;
 
 import java.util.ArrayList;
@@ -23,10 +23,63 @@ public class TransformationApp {
 //        test_keyBy(env);
 //        test_reduce(env);
 //        test_sink(env);
-        test_richMap(env);
+//        test_richMap(env);
+//        test_union(env);
+//        test_coMap(env);
+        test_coFlatMap(env);
         env.execute("TransformationApp");
     }
 
+    public static void test_coFlatMap(StreamExecutionEnvironment env){
+        DataStreamSource<String> source1 = env.fromElements("a b c", "d e f");
+        DataStreamSource<String> source2 = env.fromElements("1,2,3", "4,5,6");
+        ConnectedStreams<String, String> connect = source1.connect(source2);
+        connect.flatMap(new CoFlatMapFunction<String, String, String>() {
+            @Override
+            public void flatMap1(String value, Collector<String> out) throws Exception {
+                String[] split = value.split(" ");
+                for(String s: split) {
+                    out.collect(s);
+                }
+            }
+
+            @Override
+            public void flatMap2(String value, Collector<String> out) throws Exception {
+                String[] split = value.split(",");
+                for(String s: split) {
+                    out.collect(s);
+                }
+            }
+        }).print();
+    }
+    public static void test_coMap(StreamExecutionEnvironment env){
+        DataStreamSource<String> source1 = env.socketTextStream("192.168.31.86", 9527); // String类型
+        DataStreamSource<Student> source2 = env.addSource(new StudentSource()); // Student类型
+        // 将两个流连接在一起
+        ConnectedStreams<String, Student> connect = source1.connect(source2);
+        // source1的类型、source2的类型、返回值的类型
+        connect.map(new CoMapFunction<String, Student, String>() {
+            // 处理第一个流的业务逻辑
+            @Override
+            public String map1(String value) throws Exception {
+                return value + "-CoMap";
+            }
+            // 处理第二个流的业务逻辑
+            @Override
+            public String map2(Student value) throws Exception {
+                return value.getName();
+            }
+        }).print();
+    }
+    public static void test_union(StreamExecutionEnvironment env){
+//        DataStreamSource<String> source1 = env.socketTextStream("192.168.31.86", 9527);
+//        DataStreamSource<String> source2 = env.socketTextStream("192.168.31.86", 9528);
+//        DataStream<String> unionSource = source1.union(source2);
+//        unionSource.print();
+
+        DataStreamSource<Student> source = env.addSource(new StudentSource());
+        source.union(source).print();
+    }
     public static void test_richMap(StreamExecutionEnvironment env){
         env.setParallelism(2); // 并行度设置为2，open就只会调用两次
         DataStreamSource<String> source = env.readTextFile("data/access.log");

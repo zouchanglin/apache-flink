@@ -1,13 +1,11 @@
 package cn.tim.flink.source;
 
-import cm.tim.flink.transformation.AccessLog;
+import cn.tim.flink.transformation.AccessLog;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.util.NumberSequenceIterator;
@@ -21,10 +19,17 @@ public class SourceApp {
         // test_01(env);
 //        test_02(env);
         //test_03(env);
-        test_source_01(env);
+//        test_source_01(env);
+        test_source_mysql(env);
 
         env.execute("SourceApp");
     }
+    private static void test_source_mysql(StreamExecutionEnvironment env) {
+        DataStreamSource<Student> source = env.addSource(new StudentSource());
+        System.out.println(source.getParallelism());
+        source.print().setParallelism(1);
+    }
+
     private static void test_source_01(StreamExecutionEnvironment env) {
 //        DataStreamSource<AccessLog> source = env.addSource(new AccessLogSource());
 //        DataStreamSource<AccessLog> source = env.addSource(new AccessLogSource()).setParallelism(2); error

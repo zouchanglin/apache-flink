@@ -1,4 +1,4 @@
-package cm.tim.flink.transformation;
+package cn.tim.flink.transformation;
 
 public class AccessLog {
     private Long time;

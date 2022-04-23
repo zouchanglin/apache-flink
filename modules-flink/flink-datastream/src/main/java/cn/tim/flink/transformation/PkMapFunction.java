@@ -1,4 +1,4 @@
-package cm.tim.flink.transformation;
+package cn.tim.flink.transformation;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.functions.RuntimeContext;
